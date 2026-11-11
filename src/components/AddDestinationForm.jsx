@@ -5,19 +5,9 @@ import { motion } from "motion/react";
 import { Check, ImageIcon, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { DESTINATION_CATEGORIES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { addDestinationAction } from "@/server-action/destination-action/add-destination-action";
-
-const categories = [
-  "Beach",
-  "Mountain",
-  "City",
-  "Adventure",
-  "Cultural",
-  "Island",
-  "Desert",
-  "Wildlife",
-];
 
 const initialForm = {
   name: "",
@@ -175,7 +165,7 @@ export default function AddDestinationForm() {
               <option value="" disabled>
                 Select a category
               </option>
-              {categories.map((category) => (
+              {DESTINATION_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
