@@ -1,40 +1,11 @@
-import { CalendarClock, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CalendarClock, MapPin } from "lucide-react";
 
-function formatPrice(price) {
-  const value = Number(price);
-
-  if (price === "" || price == null || Number.isNaN(value)) {
-    return null;
-  }
-
-  return `$${value.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
-function formatDeparture(departureTime) {
-  if (!departureTime) {
-    return null;
-  }
-
-  const date = new Date(departureTime);
-
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+import { formatDeparture, formatPrice } from "@/lib/format";
 
 export default function DestinationCard({ destination }) {
   const {
+    _id,
     name,
     country,
     price,
@@ -44,11 +15,12 @@ export default function DestinationCard({ destination }) {
     category,
   } = destination;
 
+  const id = _id == null ? null : String(_id);
   const formattedPrice = formatPrice(price);
   const formattedDeparture = formatDeparture(departureTime);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -93,13 +65,32 @@ export default function DestinationCard({ destination }) {
           </p>
         )}
 
-        {formattedDeparture && (
-          <p className="mt-auto flex items-center gap-1.5 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
-            <CalendarClock className="size-3.5 shrink-0" />
-            Departs {formattedDeparture}
-          </p>
-        )}
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
+          {formattedDeparture ? (
+            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <CalendarClock className="size-3.5 shrink-0" />
+              Departs {formattedDeparture}
+            </p>
+          ) : (
+            <span />
+          )}
+
+          {id && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+              View details
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          )}
+        </div>
       </div>
+
+      {id && (
+        <Link
+          href={`/destinations/${id}`}
+          aria-label={`View details for ${name}`}
+          className="absolute inset-0 rounded-xl focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none"
+        />
+      )}
     </article>
   );
 }
