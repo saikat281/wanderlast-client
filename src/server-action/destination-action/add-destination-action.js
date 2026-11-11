@@ -1,0 +1,70 @@
+"use server";
+
+// Backend base URL, configured through SERVER_URL in .env
+const SERVER_URL = process.env.SERVER_URL;
+
+/**
+ * Server action that creates a destination through the Wanderlast API.
+ *
+ * POST {SERVER_URL}destination
+ */
+export const addDestinationAction = async (destination) => {
+  const {
+    name,
+    country,
+    price,
+    departureTime,
+    imageUrl,
+    description,
+    category,
+  } = destination ?? {};
+
+  if (!name?.trim() || !country?.trim()) {
+    return {
+      success: false,
+      error: "Fields 'name' and 'country' are required.",
+    };
+  }
+
+  try {
+    const response = await fetch(
+      `${SERVER_URL}/destination`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          country: country.trim(),
+          price: price === "" || price == null ? null : Number(price),
+          departureTime,
+          imageUrl,
+          description,
+          category,
+        }),
+        cache: "no-store",
+      },
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data?.error ?? `Failed to add destination (${response.status}).`,
+      };
+    }
+
+    return {
+      success: true,
+      message: data?.message ?? "Destination created successfully.",
+      destination: data?.destination ?? null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message || "Failed to add destination.",
+    };
+  }
+};
