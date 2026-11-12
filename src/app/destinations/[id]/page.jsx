@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import DeleteDestinationButton from "@/components/DeleteDestinationButton";
 import EditDestinationModal from "@/components/EditDestinationModal";
 import { formatDeparture, formatPrice } from "@/lib/format";
 import { getDestinationAction } from "@/server-action/destination-action/get-destination-action";
@@ -130,6 +131,12 @@ export default async function DestinationDetailsPage({ params }) {
                   imageUrl: imageUrl ?? "",
                   description: description ?? "",
                   category: category ?? "",
+                }}
+              />
+              <DeleteDestinationButton
+                destination={{
+                  id: String(destination._id),
+                  name: name ?? "",
                 }}
               />
             </div>

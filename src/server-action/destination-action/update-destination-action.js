@@ -49,7 +49,7 @@ export const updateDestinationAction = async (id, destination) => {
       destination: data?.destination ?? null,
     };
   } catch (error) {
-    return {
+    return { 
       success: false,
       error: error.message || "Failed to update destination.",
     };
