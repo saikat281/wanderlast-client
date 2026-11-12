@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Compass, Eye, EyeOff, Image as ImageIcon, Lock, Mail, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [googleError, setGoogleError] = useState("");
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -235,6 +237,30 @@ export default function SignUpForm() {
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>
+
+      <div className="mt-6 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            or
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <GoogleAuthButton
+          label="Sign up with Google"
+          onError={setGoogleError}
+        />
+
+        {googleError && (
+          <p
+            role="alert"
+            className="rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+          >
+            {googleError}
+          </p>
+        )}
+      </div>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
