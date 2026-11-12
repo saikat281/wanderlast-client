@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/
 import { Compass, Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -16,11 +17,48 @@ const navLinks = [
   { label: "Add Destination", href: "/add-destination" },
 ];
 
+function UserBadge({ user, className }) {
+  const name = user.name || user.email || "Wanderer";
+
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 items-center gap-2.5 rounded-full border border-border bg-card/60 py-1 pr-3.5 pl-1",
+        className,
+      )}
+    >
+      {user.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={user.image}
+          alt={`${name} avatar`}
+          referrerPolicy="no-referrer"
+          className="size-8 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+          {name.slice(0, 1).toUpperCase()}
+        </span>
+      )}
+      <div className="flex min-w-0 flex-col leading-tight">
+        <span className="max-w-36 truncate text-sm font-semibold text-foreground">
+          {user.name}
+        </span>
+        <span className="max-w-36 truncate text-[11px] text-muted-foreground">
+          {user.email}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 12);
@@ -81,10 +119,17 @@ export default function Navbar() {
           })}
         </ul>
 
-        <div className="hidden md:block">
-          <Button asChild className="rounded-full">
+        <div className="hidden items-center gap-2 md:flex">
+          <Button asChild variant="ghost" className="rounded-full">
             <Link href="/bookings">Plan a trip</Link>
           </Button>
+          {user ? (
+            <UserBadge user={user} />
+          ) : (
+            <Button asChild className="rounded-full">
+              <Link href="/sign-up">Sign up</Link>
+            </Button>
+          )}
         </div>
 
         <Button
@@ -141,6 +186,22 @@ export default function Navbar() {
                     Plan a trip
                   </Link>
                 </Button>
+                {user ? (
+                  <UserBadge
+                    user={user}
+                    className="mt-2 w-full justify-start rounded-xl py-2 pl-2"
+                  />
+                ) : (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="mt-2 w-full rounded-full"
+                  >
+                    <Link href="/sign-up" onClick={() => setOpen(false)}>
+                      Sign up
+                    </Link>
+                  </Button>
+                )}
               </motion.li>
             </ul>
           </motion.div>
