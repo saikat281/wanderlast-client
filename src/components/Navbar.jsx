@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
-import { Compass, Menu, X } from "lucide-react";
+import { Compass, LogOut, Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -54,8 +54,10 @@ function UserBadge({ user, className }) {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const { scrollY } = useScroll();
   const { data: session } = authClient.useSession();
   const user = session?.user;
@@ -63,6 +65,15 @@ export default function Navbar() {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 12);
   });
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await authClient.signOut();
+    setSigningOut(false);
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <motion.header
@@ -124,11 +135,27 @@ export default function Navbar() {
             <Link href="/bookings">Plan a trip</Link>
           </Button>
           {user ? (
-            <UserBadge user={user} />
+            <>
+              <UserBadge user={user} />
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={handleSignOut}
+                disabled={signingOut}
+              >
+                <LogOut className="size-4" />
+                {signingOut ? "Logging out…" : "Logout"}
+              </Button>
+            </>
           ) : (
-            <Button asChild className="rounded-full">
-              <Link href="/sign-up">Sign up</Link>
-            </Button>
+            <>
+              <Button asChild variant="ghost" className="rounded-full">
+                <Link href="/sign-in">Login</Link>
+              </Button>
+              <Button asChild className="rounded-full">
+                <Link href="/sign-up">Sign up</Link>
+              </Button>
+            </>
           )}
         </div>
 
@@ -187,20 +214,38 @@ export default function Navbar() {
                   </Link>
                 </Button>
                 {user ? (
-                  <UserBadge
-                    user={user}
-                    className="mt-2 w-full justify-start rounded-xl py-2 pl-2"
-                  />
+                  <>
+                    <UserBadge
+                      user={user}
+                      className="mt-2 w-full justify-start rounded-xl py-2 pl-2"
+                    />
+                    <Button
+                      variant="outline"
+                      className="mt-2 w-full rounded-full"
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                    >
+                      <LogOut className="size-4" />
+                      {signingOut ? "Logging out…" : "Logout"}
+                    </Button>
+                  </>
                 ) : (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="mt-2 w-full rounded-full"
-                  >
-                    <Link href="/sign-up" onClick={() => setOpen(false)}>
-                      Sign up
-                    </Link>
-                  </Button>
+                  <>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="mt-2 w-full rounded-full"
+                    >
+                      <Link href="/sign-in" onClick={() => setOpen(false)}>
+                        Login
+                      </Link>
+                    </Button>
+                    <Button asChild className="mt-2 w-full rounded-full">
+                      <Link href="/sign-up" onClick={() => setOpen(false)}>
+                        Sign up
+                      </Link>
+                    </Button>
+                  </>
                 )}
               </motion.li>
             </ul>
