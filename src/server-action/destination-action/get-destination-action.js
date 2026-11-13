@@ -1,4 +1,5 @@
-import { GET } from "@/server-action/request";
+// Backend base URL, configured through SERVER_URL in .env
+const SERVER_URL = process.env.SERVER_URL;
 
 /**
  * Fetches a single destination from the Wanderlast API.
@@ -16,19 +17,35 @@ export const getDestinationAction = async (id) => {
   }
 
   try {
-    const destination = await GET(`/destination/${encodeURIComponent(id)}`);
+    const response = await fetch(
+      `${SERVER_URL}/destination/${encodeURIComponent(id)}`,
+      {
+        cache: "no-store",
+      },
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        destination: null,
+        status: response.status,
+        error: data?.error ?? `Failed to fetch destination (${response.status}).`,
+      };
+    }
 
     return {
       success: true,
-      destination,
-      status: 200,
+      destination: data,
+      status: response.status,
       error: null,
     };
   } catch (error) {
     return {
       success: false,
       destination: null,
-      status: error.status ?? 500,
+      status: 500,
       error: error.message || "Failed to fetch destination.",
     };
   }

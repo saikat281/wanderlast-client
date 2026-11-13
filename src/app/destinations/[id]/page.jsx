@@ -8,7 +8,7 @@ import {
   Tag,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import BookTripButton from "@/components/BookTripButton";
 import DeleteDestinationButton from "@/components/DeleteDestinationButton";
 import EditDestinationModal from "@/components/EditDestinationModal";
 import { formatDeparture, formatPrice } from "@/lib/format";
@@ -118,9 +118,18 @@ export default async function DestinationDetailsPage({ params }) {
             </dl>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="rounded-full">
-                <Link href="/bookings">Book this trip</Link>
-              </Button>
+              <BookTripButton
+                destination={{
+                  id: String(destination._id),
+                  name: name ?? "",
+                  country: country ?? "",
+                  price: price ?? "",
+                  departureTime: departureTime ?? "",
+                  imageUrl: imageUrl ?? "",
+                  description: description ?? "",
+                  category: category ?? "",
+                }}
+              />
               <EditDestinationModal
                 destination={{
                   id: String(destination._id),

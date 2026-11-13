@@ -1,6 +1,7 @@
 "use server";
 
-import { DELETE } from "@/server-action/request";
+// Backend base URL, configured through SERVER_URL in .env
+const SERVER_URL = process.env.SERVER_URL;
 
 /**
  * Server action that deletes a destination through the Wanderlast API.
@@ -16,7 +17,22 @@ export const deleteDestinationAction = async (id) => {
   }
 
   try {
-    const data = await DELETE(`/destination/${encodeURIComponent(id)}`);
+    const response = await fetch(
+      `${SERVER_URL}/destination/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        cache: "no-store",
+      },
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data?.error ?? `Failed to delete destination (${response.status}).`,
+      };
+    }
 
     return {
       success: true,

@@ -1,6 +1,7 @@
 "use server";
 
-import { PATCH } from "@/server-action/request";
+// Backend base URL, configured through SERVER_URL in .env
+const SERVER_URL = process.env.SERVER_URL;
 
 /**
  * Server action that updates a destination through the Wanderlast API.
@@ -33,15 +34,34 @@ export const updateDestinationAction = async (id, destination) => {
   }
 
   try {
-    const data = await PATCH(`/destination/${encodeURIComponent(id)}`, {
-      name: name.trim(),
-      country: country.trim(),
-      price: price === "" || price == null ? null : Number(price),
-      departureTime,
-      imageUrl,
-      description,
-      category,
-    });
+    const response = await fetch(
+      `${SERVER_URL}/destination/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          country: country.trim(),
+          price: price === "" || price == null ? null : Number(price),
+          departureTime,
+          imageUrl,
+          description,
+          category,
+        }),
+        cache: "no-store",
+      },
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data?.error ?? `Failed to update destination (${response.status}).`,
+      };
+    }
 
     return {
       success: true,
@@ -49,7 +69,7 @@ export const updateDestinationAction = async (id, destination) => {
       destination: data?.destination ?? null,
     };
   } catch (error) {
-    return { 
+    return {
       success: false,
       error: error.message || "Failed to update destination.",
     };
