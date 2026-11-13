@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { auth, ensureDatabaseConnection } from "@/lib/auth";
 import { getAuthToken } from "@/lib/auth-token";
 
 // Backend base URL, configured through SERVER_URL in .env
@@ -25,6 +25,8 @@ export const deleteBookingAction = async (id) => {
   let session;
 
   try {
+    await ensureDatabaseConnection();
+
     session = await auth.api.getSession({
       headers: await headers(),
     });

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { auth, ensureDatabaseConnection } from "@/lib/auth";
 
 /**
  * Resolves the Better Auth JWT for the current request.
@@ -25,6 +25,8 @@ export async function getAuthToken() {
   }
 
   try {
+    await ensureDatabaseConnection();
+
     const { token } = await auth.api.getToken({ headers: requestHeaders });
 
     if (!token) {
