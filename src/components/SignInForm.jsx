@@ -29,7 +29,7 @@ function Field({ label, htmlFor, icon: Icon, children }) {
   );
 }
 
-export default function SignInForm() {
+export default function SignInForm({ redirectTo = "/destinations" }) {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -59,7 +59,7 @@ export default function SignInForm() {
       return;
     }
 
-    router.push("/destinations");
+    router.push(redirectTo);
     router.refresh();
   }
 
