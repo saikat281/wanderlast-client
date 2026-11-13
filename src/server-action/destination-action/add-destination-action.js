@@ -1,5 +1,7 @@
 "use server";
 
+import { getAuthToken } from "@/lib/auth-token";
+
 // Backend base URL, configured through SERVER_URL in .env
 const SERVER_URL = process.env.SERVER_URL;
 
@@ -22,7 +24,18 @@ export const addDestinationAction = async (destination) => {
   if (!name?.trim() || !country?.trim()) {
     return {
       success: false,
+      status: 400,
       error: "Fields 'name' and 'country' are required.",
+    };
+  }
+
+  const { token, status: authStatus, error: authError } = await getAuthToken();
+
+  if (!token) {
+    return {
+      success: false,
+      status: authStatus,
+      error: authError,
     };
   }
 
@@ -33,6 +46,7 @@ export const addDestinationAction = async (destination) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: name.trim(),

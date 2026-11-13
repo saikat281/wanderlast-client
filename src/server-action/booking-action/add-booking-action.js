@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
+import { getAuthToken } from "@/lib/auth-token";
 
 // Backend base URL, configured through SERVER_URL in .env
 const SERVER_URL = process.env.SERVER_URL;
@@ -53,6 +54,16 @@ export const addBookingAction = async (booking) => {
     };
   }
 
+  const { token, status: authStatus, error: authError } = await getAuthToken();
+
+  if (!token) {
+    return {
+      success: false,
+      status: authStatus,
+      error: authError,
+    };
+  }
+
   const {
     name,
     country,
@@ -68,6 +79,7 @@ export const addBookingAction = async (booking) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         destinationId: String(destinationId),

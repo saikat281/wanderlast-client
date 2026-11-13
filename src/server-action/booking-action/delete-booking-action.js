@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
+import { getAuthToken } from "@/lib/auth-token";
 
 // Backend base URL, configured through SERVER_URL in .env
 const SERVER_URL = process.env.SERVER_URL;
@@ -43,11 +44,24 @@ export const deleteBookingAction = async (id) => {
     };
   }
 
+  const { token, status: authStatus, error: authError } = await getAuthToken();
+
+  if (!token) {
+    return {
+      success: false,
+      status: authStatus,
+      error: authError,
+    };
+  }
+
   try {
     const response = await fetch(
       `${SERVER_URL}/booking/${encodeURIComponent(id)}`,
       {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         cache: "no-store",
       },
     );

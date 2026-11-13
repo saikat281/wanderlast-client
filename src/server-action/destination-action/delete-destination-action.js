@@ -1,5 +1,7 @@
 "use server";
 
+import { getAuthToken } from "@/lib/auth-token";
+
 // Backend base URL, configured through SERVER_URL in .env
 const SERVER_URL = process.env.SERVER_URL;
 
@@ -12,7 +14,18 @@ export const deleteDestinationAction = async (id) => {
   if (!id) {
     return {
       success: false,
+      status: 400,
       error: "Invalid destination id.",
+    };
+  }
+
+  const { token, status: authStatus, error: authError } = await getAuthToken();
+
+  if (!token) {
+    return {
+      success: false,
+      status: authStatus,
+      error: authError,
     };
   }
 
@@ -21,6 +34,9 @@ export const deleteDestinationAction = async (id) => {
       `${SERVER_URL}/destination/${encodeURIComponent(id)}`,
       {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         cache: "no-store",
       },
     );

@@ -1,3 +1,7 @@
+"use server";
+
+import { getAuthToken } from "@/lib/auth-token";
+
 // Backend base URL, configured through SERVER_URL in .env
 const SERVER_URL = process.env.SERVER_URL;
 
@@ -16,15 +20,30 @@ export const getDestinationAction = async (id) => {
     };
   }
 
+  const { token, status: authStatus, error: authError } = await getAuthToken();
+
+  if (!token) {
+    return {
+      success: false,
+      destination: null,
+      status: authStatus,
+      error: authError,
+    };
+  }
+
   try {
     const response = await fetch(
       `${SERVER_URL}/destination/${encodeURIComponent(id)}`,
       {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         cache: "no-store",
       },
     );
 
     const data = await response.json().catch(() => null);
+    console.log(data);
 
     if (!response.ok) {
       return {
